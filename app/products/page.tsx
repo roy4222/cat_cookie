@@ -68,29 +68,28 @@ export default function ProductsPage() {
   const searchParams = useSearchParams();
   const categoryParam = searchParams.get('category');
   const [selectedCategory, setSelectedCategory] = useState(categoryParam || '全部');
-  const [products, setProducts] = useState(mockProducts);
   const [filteredProducts, setFilteredProducts] = useState(mockProducts);
 
   // 產品分類選項
   const categories = ['全部', '貓咪餅乾', '禮盒組合'];
 
-  // 處理分類切換
+  // A. 處理分類切換
   useEffect(() => {
     if (selectedCategory === '全部') {
-      setFilteredProducts(products);
+      setFilteredProducts(mockProducts);
     } else {
       setFilteredProducts(
-        products.filter(product => product.category === selectedCategory)
+        mockProducts.filter(product => product.category === selectedCategory)
       );
     }
-  }, [selectedCategory, products]);
+  }, [selectedCategory]);
 
-  // 處理URL分類參數
+  // B. 處理URL分類參數
   useEffect(() => {
     if (categoryParam && categories.includes(categoryParam)) {
       setSelectedCategory(categoryParam);
     }
-  }, [categoryParam]);
+  }, [categoryParam, categories]);
 
   return (
     <div className="container mx-auto px-4 py-12">
