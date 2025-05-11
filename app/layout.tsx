@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import Navbar from "../components/Navbar";
+import AppProvider from "./contexts/AppProvider";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -35,22 +36,24 @@ export default function RootLayout({
           color: 'var(--foreground)',
         }}
       >
-        <Navbar />
-        <main>
-          {children}
-        </main>
-        <footer 
-          style={{ 
-            backgroundColor: 'var(--primary-light)',
-            paddingTop: '1.5rem',
-            paddingBottom: '1.5rem',
-            marginTop: '3rem'
-          }}
-        >
-          <div className="container-custom text-center">
-            <p>© 2024 愛心手工餅乾. 保留所有權利.</p>
-          </div>
-        </footer>
+        <AppProvider>
+          <Navbar />
+          <main>
+            {children}
+          </main>
+          <footer 
+            style={{ 
+              backgroundColor: 'var(--primary-light)',
+              paddingTop: '1.5rem',
+              paddingBottom: '1.5rem',
+              marginTop: '3rem'
+            }}
+          >
+            <div className="container-custom text-center">
+              <p>© 2024 愛心手工餅乾. 保留所有權利.</p>
+            </div>
+          </footer>
+        </AppProvider>
       </body>
     </html>
   );

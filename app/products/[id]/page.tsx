@@ -3,6 +3,9 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
+import { useCart } from '../../contexts/CartContext';
+import { useAuth } from '../../contexts/AuthContext';
+import { CartItem } from '../../firebase/cart';
 
 // 模擬產品數據
 const mockProducts = [
@@ -49,6 +52,12 @@ export default function ProductDetail() {
   const router = useRouter();
   const params = useParams<{ id: string }>();
   const [quantity, setQuantity] = useState(1);
+  const [isAddingToCart, setIsAddingToCart] = useState(false);
+  const [addCartSuccess, setAddCartSuccess] = useState(false);
+  const [addCartError, setAddCartError] = useState('');
+  
+  const { addItem } = useCart();
+  const { user } = useAuth();
 
   // 根據ID查找產品
   const product = mockProducts.find(p => p.id === params.id);
@@ -77,9 +86,41 @@ export default function ProductDetail() {
   };
 
   // 處理加入購物車
-  const handleAddToCart = () => {
-    // 這裡將來會實現實際的購物車功能
-    alert(`已將 ${quantity} 件 ${product.name} 加入購物車`);
+  const handleAddToCart = async () => {
+    // 清除之前的訊息
+    setAddCartSuccess(false);
+    setAddCartError('');
+    
+    // 如果用戶未登入，導航到登入頁面
+    if (!user) {
+      router.push('/auth/login');
+      return;
+    }
+    
+    setIsAddingToCart(true);
+    
+    try {
+      const cartItem: CartItem = {
+        productId: product.id,
+        name: product.name,
+        price: product.price,
+        quantity: quantity,
+        image: product.image
+      };
+      
+      await addItem(cartItem);
+      setAddCartSuccess(true);
+      
+      // 2秒後清除成功訊息
+      setTimeout(() => {
+        setAddCartSuccess(false);
+      }, 2000);
+    } catch (error) {
+      console.error('加入購物車失敗：', error);
+      setAddCartError('加入購物車失敗，請稍後再試');
+    } finally {
+      setIsAddingToCart(false);
+    }
   };
 
   return (
@@ -96,6 +137,23 @@ export default function ProductDetail() {
           返回
         </button>
       </div>
+      
+      {/* 成功訊息 */}
+      {addCartSuccess && (
+        <div className="bg-success bg-opacity-20 text-success p-4 rounded-lg mb-6 flex items-center">
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+            <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+          </svg>
+          已成功加入購物車
+        </div>
+      )}
+      
+      {/* 錯誤訊息 */}
+      {addCartError && (
+        <div className="bg-error bg-opacity-20 text-error p-4 rounded-lg mb-6">
+          {addCartError}
+        </div>
+      )}
 
       {/* 產品詳情 */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
@@ -147,9 +205,10 @@ export default function ProductDetail() {
           {/* 加入購物車按鈕 */}
           <button 
             onClick={handleAddToCart}
+            disabled={isAddingToCart}
             className="w-full btn-primary mb-4"
           >
-            加入購物車
+            {isAddingToCart ? '加入中...' : '加入購物車'}
           </button>
 
           {/* 營養成分 */}
