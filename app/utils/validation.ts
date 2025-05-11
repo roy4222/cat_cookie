@@ -24,7 +24,7 @@ export const validateName = (name: string): boolean => {
 };
 
 // 錯誤訊息
-export const errorMessages = {
+export const errorMessages: Record<string, string> = {
   emailRequired: '請輸入電子郵件',
   emailInvalid: '請輸入有效的電子郵件地址',
   passwordRequired: '請輸入密碼',
@@ -33,6 +33,8 @@ export const errorMessages = {
   nameRequired: '請輸入姓名',
   nameInvalid: '姓名至少需要2個字元',
   phoneInvalid: '請輸入有效的手機號碼（09 開頭的10位數字）',
+  displayNameRequired: '請輸入姓名',
+  confirmPasswordRequired: '請確認密碼'
 };
 
 // 驗證表單數據
@@ -45,7 +47,8 @@ export const validateForm = (formData: Record<string, string>, rules: Record<str
 
     // 檢查必填
     if (fieldRules.includes('required') && (!value || value.trim() === '')) {
-      errors[fieldName] = errorMessages[`${fieldName}Required`] || '此欄位為必填';
+      const requiredKey = `${fieldName}Required`;
+      errors[fieldName] = errorMessages[requiredKey] || '此欄位為必填';
       return;
     }
 

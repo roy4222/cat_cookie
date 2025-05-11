@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '../../contexts/AuthContext';
 import { validateForm } from '../../utils/validation';
+import { FirebaseError } from 'firebase/app';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -56,14 +57,18 @@ export default function LoginPage() {
     try {
       await login(formData.email, formData.password);
       router.push('/');
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('登入失敗：', error);
       
       // 處理常見的登入錯誤
-      if (error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password') {
-        setLoginError('電子郵件或密碼不正確');
-      } else if (error.code === 'auth/too-many-requests') {
-        setLoginError('登入嘗試次數過多，請稍後再試');
+      if (error instanceof FirebaseError) {
+        if (error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password') {
+          setLoginError('電子郵件或密碼不正確');
+        } else if (error.code === 'auth/too-many-requests') {
+          setLoginError('登入嘗試次數過多，請稍後再試');
+        } else {
+          setLoginError('登入失敗，請稍後再試');
+        }
       } else {
         setLoginError('登入失敗，請稍後再試');
       }
@@ -80,7 +85,7 @@ export default function LoginPage() {
     try {
       await loginWithGoogle();
       router.push('/');
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Google 登入失敗：', error);
       setLoginError('Google 登入失敗，請稍後再試');
     } finally {

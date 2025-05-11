@@ -7,7 +7,7 @@ import Image from 'next/image';
 import { Product } from '../firebase/firestore';
 
 // 模擬產品數據
-const mockProducts = [
+const mockProducts: Product[] = [
   {
     id: '1',
     name: '橘貓花紋原味奶油餅乾',

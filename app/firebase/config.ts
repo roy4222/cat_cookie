@@ -1,7 +1,7 @@
 // Firebase 配置檔案
 import { initializeApp, getApps } from 'firebase/app';
 import { getAuth } from 'firebase/auth';
-import { getFirestore, enableIndexedDbPersistence, connectFirestoreEmulator, disableNetwork, enableNetwork } from 'firebase/firestore';
+import { getFirestore, enableIndexedDbPersistence, disableNetwork, enableNetwork } from 'firebase/firestore';
 
 // Firebase 配置
 const firebaseConfig = {
@@ -51,7 +51,8 @@ export const checkFirestoreConnection = async (): Promise<boolean> => {
     
     clearTimeout(timeoutId);
     return response.ok;
-  } catch (error) {
+  } catch (_error) {
+    // 我們不需要使用錯誤變數，用下劃線標記忽略
     return false;
   }
 };

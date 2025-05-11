@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '../../contexts/AuthContext';
 import { validateForm } from '../../utils/validation';
+import { FirebaseError } from 'firebase/app';
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -60,14 +61,18 @@ export default function RegisterPage() {
     try {
       await register(formData.email, formData.password, formData.displayName);
       router.push('/');
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('註冊失敗：', error);
       
       // 處理常見的註冊錯誤
-      if (error.code === 'auth/email-already-in-use') {
-        setRegisterError('此電子郵件已被使用');
-      } else if (error.code === 'auth/weak-password') {
-        setRegisterError('密碼強度不足，請使用更複雜的密碼');
+      if (error instanceof FirebaseError) {
+        if (error.code === 'auth/email-already-in-use') {
+          setRegisterError('此電子郵件已被使用');
+        } else if (error.code === 'auth/weak-password') {
+          setRegisterError('密碼強度不足，請使用更複雜的密碼');
+        } else {
+          setRegisterError('註冊失敗，請稍後再試');
+        }
       } else {
         setRegisterError('註冊失敗，請稍後再試');
       }
@@ -84,7 +89,7 @@ export default function RegisterPage() {
     try {
       await loginWithGoogle();
       router.push('/');
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Google 註冊失敗：', error);
       setRegisterError('Google 註冊失敗，請稍後再試');
     } finally {

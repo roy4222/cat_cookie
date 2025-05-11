@@ -2,9 +2,7 @@
 import { 
   doc, 
   getDoc, 
-  setDoc, 
-  updateDoc, 
-  deleteDoc 
+  setDoc 
 } from 'firebase/firestore';
 import { firestore } from './config';
 import { getCurrentUser } from './auth';
@@ -54,7 +52,7 @@ export const getUserCart = async (userId?: string): Promise<Cart> => {
     } else {
       return emptyCart;
     }
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('獲取購物車失敗：', error);
     return emptyCart;
   }
@@ -72,7 +70,7 @@ export const updateUserCart = async (cart: Cart, userId?: string): Promise<void>
     
     const cartDocRef = doc(firestore, getUserCartPath(uid));
     await setDoc(cartDocRef, cart);
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('更新購物車失敗：', error);
     throw error;
   }
@@ -110,7 +108,7 @@ export const addToCart = async (
     await updateUserCart(cart, uid);
     
     return cart;
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('添加商品到購物車失敗：', error);
     throw error;
   }
@@ -143,7 +141,7 @@ export const removeFromCart = async (
     }
     
     return cart;
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('從購物車移除商品失敗：', error);
     throw error;
   }
@@ -182,7 +180,7 @@ export const updateCartItemQuantity = async (
     }
     
     return cart;
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('更新購物車商品數量失敗：', error);
     throw error;
   }
@@ -199,7 +197,7 @@ export const clearCart = async (userId?: string): Promise<void> => {
     }
     
     await updateUserCart(emptyCart, uid);
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('清空購物車失敗：', error);
     throw error;
   }

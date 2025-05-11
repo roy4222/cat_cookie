@@ -16,7 +16,8 @@ import {
   DocumentData,
   QueryConstraint,
   WithFieldValue,
-  onSnapshot
+  onSnapshot,
+  FirestoreError
 } from 'firebase/firestore';
 import { firestore } from './config';
 
@@ -41,7 +42,7 @@ export const getDocument = async <T>(collectionPath: string, docId: string): Pro
     } else {
       return null;
     }
-  } catch (error) {
+  } catch (error: unknown) {
     console.error(`獲取文檔失敗 (${collectionPath}/${docId}):`, error);
     throw error;
   }
@@ -60,14 +61,14 @@ export const getCollection = async <T>(
     
     const querySnapshot = await getDocs(q);
     return querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as T));
-  } catch (error) {
+  } catch (error: unknown) {
     console.error(`獲取集合失敗 (${collectionPath}):`, error);
     throw error;
   }
 };
 
 // 添加文檔
-export const addDocument = async <T extends Record<string, any>>(
+export const addDocument = async <T extends Record<string, unknown>>(
   collectionPath: string, 
   data: T
 ): Promise<string> => {
@@ -75,14 +76,14 @@ export const addDocument = async <T extends Record<string, any>>(
     const collectionRef = getCollectionRef(collectionPath);
     const docRef = await addDoc(collectionRef, data as WithFieldValue<DocumentData>);
     return docRef.id;
-  } catch (error) {
+  } catch (error: unknown) {
     console.error(`添加文檔失敗 (${collectionPath}):`, error);
     throw error;
   }
 };
 
 // 更新文檔
-export const updateDocument = async <T extends Record<string, any>>(
+export const updateDocument = async <T extends Record<string, unknown>>(
   collectionPath: string, 
   docId: string, 
   data: Partial<T>
@@ -90,7 +91,7 @@ export const updateDocument = async <T extends Record<string, any>>(
   try {
     const docRef = getDocumentRef(collectionPath, docId);
     await updateDoc(docRef, data as DocumentData);
-  } catch (error) {
+  } catch (error: unknown) {
     console.error(`更新文檔失敗 (${collectionPath}/${docId}):`, error);
     throw error;
   }
@@ -104,7 +105,7 @@ export const deleteDocument = async (
   try {
     const docRef = getDocumentRef(collectionPath, docId);
     await deleteDoc(docRef);
-  } catch (error) {
+  } catch (error: unknown) {
     console.error(`刪除文檔失敗 (${collectionPath}/${docId}):`, error);
     throw error;
   }
@@ -155,13 +156,13 @@ export const listenToProducts = (
       }) as Product);
       
       callback(products);
-    }, (error) => {
+    }, (error: FirestoreError) => {
       console.error('監聽產品資料失敗:', error);
     });
     
     // 返回取消監聽的函數
     return unsubscribe;
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('設置產品監聽失敗:', error);
     return () => {}; // 返回空函數作為錯誤回退
   }
@@ -187,13 +188,13 @@ export const listenToProduct = (
       } else {
         callback(null);
       }
-    }, (error) => {
+    }, (error: FirestoreError) => {
       console.error(`監聽產品資料失敗 (${productId}):`, error);
     });
     
     // 返回取消監聽的函數
     return unsubscribe;
-  } catch (error) {
+  } catch (error: unknown) {
     console.error(`設置產品監聽失敗 (${productId}):`, error);
     return () => {}; // 返回空函數作為錯誤回退
   }
