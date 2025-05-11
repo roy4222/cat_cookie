@@ -3,13 +3,14 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { onAuthStateChanged, User } from 'firebase/auth';
 import { auth } from '../firebase/config';
-import { loginUser, registerUser, signOut, resetPassword } from '../firebase/auth';
+import { loginUser, registerUser, signOut, resetPassword, signInWithGoogle } from '../firebase/auth';
 
 // 定義認證上下文類型
 interface AuthContextType {
   user: User | null;
   loading: boolean;
   login: (email: string, password: string) => Promise<void>;
+  loginWithGoogle: () => Promise<void>;
   register: (email: string, password: string, displayName: string) => Promise<void>;
   logout: () => Promise<void>;
   resetUserPassword: (email: string) => Promise<void>;
@@ -45,6 +46,19 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       await loginUser(email, password);
     } catch (error) {
       console.error('登入失敗：', error);
+      throw error;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Google 登入功能
+  const loginWithGoogle = async () => {
+    try {
+      setLoading(true);
+      await signInWithGoogle();
+    } catch (error) {
+      console.error('Google 登入失敗：', error);
       throw error;
     } finally {
       setLoading(false);
@@ -91,6 +105,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     user,
     loading,
     login,
+    loginWithGoogle,
     register,
     logout,
     resetUserPassword,

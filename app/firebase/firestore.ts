@@ -15,7 +15,8 @@ import {
   CollectionReference,
   DocumentData,
   QueryConstraint,
-  WithFieldValue
+  WithFieldValue,
+  onSnapshot
 } from 'firebase/firestore';
 import { firestore } from './config';
 
@@ -114,4 +115,86 @@ export const queryUtils = {
   where: where,
   orderBy: orderBy,
   limit: limit
+}; 
+
+// 產品資料類型定義
+export interface Product {
+  id: string;
+  name: string;
+  description: string;
+  price: number;
+  image: string;
+  category: string;
+  quantity?: string;
+  ingredients?: string[];
+  nutritionFacts?: {
+    calories: number;
+    fat: string;
+    carbs: string;
+    protein: string;
+    sugar: string;
+  };
+}
+
+// 監聽產品資料變化的函數 (即時同步)
+export const listenToProducts = (
+  callback: (products: Product[]) => void,
+  constraints: QueryConstraint[] = []
+): (() => void) => {
+  try {
+    const productsRef = getCollectionRef('products');
+    const q = constraints.length > 0 
+      ? query(productsRef, ...constraints) 
+      : query(productsRef);
+    
+    // 設置實時監聽
+    const unsubscribe = onSnapshot(q, (querySnapshot) => {
+      const products = querySnapshot.docs.map(doc => ({ 
+        id: doc.id, 
+        ...doc.data() 
+      }) as Product);
+      
+      callback(products);
+    }, (error) => {
+      console.error('監聽產品資料失敗:', error);
+    });
+    
+    // 返回取消監聽的函數
+    return unsubscribe;
+  } catch (error) {
+    console.error('設置產品監聽失敗:', error);
+    return () => {}; // 返回空函數作為錯誤回退
+  }
+};
+
+// 獲取單個產品資料並監聽變化
+export const listenToProduct = (
+  productId: string,
+  callback: (product: Product | null) => void
+): (() => void) => {
+  try {
+    const productRef = getDocumentRef('products', productId);
+    
+    // 設置實時監聽
+    const unsubscribe = onSnapshot(productRef, (docSnapshot) => {
+      if (docSnapshot.exists()) {
+        const product = { 
+          id: docSnapshot.id, 
+          ...docSnapshot.data() 
+        } as Product;
+        
+        callback(product);
+      } else {
+        callback(null);
+      }
+    }, (error) => {
+      console.error(`監聽產品資料失敗 (${productId}):`, error);
+    });
+    
+    // 返回取消監聽的函數
+    return unsubscribe;
+  } catch (error) {
+    console.error(`設置產品監聽失敗 (${productId}):`, error);
+    return () => {}; // 返回空函數作為錯誤回退
+  }
 }; 

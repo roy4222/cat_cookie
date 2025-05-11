@@ -4,8 +4,9 @@ import { useState, useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
+import { Product } from '../firebase/firestore';
 
-// 模擬產品數據 (與 page.tsx 保持一致，或者可以考慮從共享位置導入)
+// 模擬產品數據
 const mockProducts = [
   {
     id: '1',
@@ -63,16 +64,16 @@ const mockProducts = [
   }
 ];
 
-// categories 常量 (與 page.tsx 保持一致，或者可以考慮從共享位置導入)
+// 分類常量
 const categories = ['全部', '貓咪餅乾', '禮盒組合'];
 
 export default function ProductClientComponent() {
   const searchParams = useSearchParams();
   const categoryParam = searchParams.get('category');
   const [selectedCategory, setSelectedCategory] = useState(categoryParam || '全部');
-  const [filteredProducts, setFilteredProducts] = useState(mockProducts);
-
-  // A. 處理分類切換
+  const [filteredProducts, setFilteredProducts] = useState<Product[]>(mockProducts);
+  
+  // 處理分類切換
   useEffect(() => {
     if (selectedCategory === '全部') {
       setFilteredProducts(mockProducts);
@@ -82,13 +83,13 @@ export default function ProductClientComponent() {
       );
     }
   }, [selectedCategory]);
-
-  // B. 處理URL分類參數
+  
+  // 處理URL分類參數
   useEffect(() => {
     if (categoryParam && categories.includes(categoryParam)) {
       setSelectedCategory(categoryParam);
     }
-  }, [categoryParam]); // categories 是外部常量，所以從依賴中移除
+  }, [categoryParam]);
 
   return (
     <>
@@ -125,16 +126,21 @@ export default function ProductClientComponent() {
                   src={product.image}
                   alt={product.name}
                   fill
+                  sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                   style={{ objectFit: 'cover' }}
                 />
               </div>
               <div className="p-4">
                 <h3 className="text-xl font-semibold mb-2">{product.name}</h3>
-                <p className="text-sm text-gray-600 mb-2">{product.description.split('。')[0] + '。'}</p>
+                <p className="text-sm text-gray-600 mb-2">
+                  {product.description.split('。')[0] + '。'}
+                </p>
                 <div className="flex justify-between items-center pt-2">
-                  <span className="text-lg font-bold text-primary">${product.price} <span className="text-xs font-normal">/ {product.quantity}</span></span>
+                  <span className="text-lg font-bold text-primary">
+                    ${product.price} <span className="text-xs font-normal">/ {product.quantity || '件'}</span>
+                  </span>
                   <Link 
-                    href={`/products/${product.id}`} // 注意：這裡的連結可能需要根據您的路由結構調整
+                    href={`/products/${product.id}`}
                     className="btn-primary"
                   >
                     查看詳情

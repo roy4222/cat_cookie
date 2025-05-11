@@ -80,10 +80,14 @@ export default function Home() {
                 fontWeight: 'bold', 
                 marginBottom: '1rem',
               }}>
-                手工製作的<span style={{ color: 'var(--primary)' }}>貓咪餅乾</span>
+                療癒系<span style={{ color: 'var(--primary)' }}>手作貓貓餅乾</span>登場！
               </h1>
               <p style={{ fontSize: '1.125rem', marginBottom: '2rem' }}>
-                使用最優質的食材，以滿滿的愛製作每一塊貓咪造型餅乾，讓您品嚐最道地的手工甜點。
+                每片都是橘貓的背影剪影，搭配手工斑紋，真實還原主子可愛姿態。附贈可可巧克力筆，讓你親手畫上臉蛋，打造獨一無二的貓咪表情。
+              </p>
+              <p style={{ fontSize: '1.125rem', marginBottom: '2rem' }}>
+                不只是點心，更是一份陪伴與創作的時光。
+                無論送禮還是自用，都讓人心動不已。
               </p>
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1rem' }}>
                 <Link href="/products" className="btn-primary">

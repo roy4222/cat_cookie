@@ -6,9 +6,11 @@ import {
   updateProfile,
   sendPasswordResetEmail,
   UserCredential,
-  User
+  User,
+  GoogleAuthProvider,
+  signInWithPopup
 } from 'firebase/auth';
-import { doc, setDoc } from 'firebase/firestore';
+import { doc, setDoc, getDoc } from 'firebase/firestore';
 import { auth, firestore } from './config';
 
 // 註冊新使用者
@@ -50,6 +52,34 @@ export const loginUser = async (
     return await signInWithEmailAndPassword(auth, email, password);
   } catch (error) {
     console.error('使用者登入失敗：', error);
+    throw error;
+  }
+};
+
+// Google 登入
+export const signInWithGoogle = async (): Promise<UserCredential> => {
+  try {
+    const provider = new GoogleAuthProvider();
+    const userCredential = await signInWithPopup(auth, provider);
+    const user = userCredential.user;
+    
+    // 檢查用戶是否已存在於 Firestore
+    const userDoc = await getDoc(doc(firestore, 'users', user.uid));
+    
+    // 如果用戶不存在，則在 Firestore 中創建用戶
+    if (!userDoc.exists()) {
+      await setDoc(doc(firestore, 'users', user.uid), {
+        uid: user.uid,
+        email: user.email,
+        displayName: user.displayName || '會員',
+        phone: '',
+        createdAt: new Date().toISOString(),
+      });
+    }
+    
+    return userCredential;
+  } catch (error) {
+    console.error('Google 登入失敗：', error);
     throw error;
   }
 };

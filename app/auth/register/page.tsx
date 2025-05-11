@@ -8,7 +8,7 @@ import { validateForm } from '../../utils/validation';
 
 export default function RegisterPage() {
   const router = useRouter();
-  const { register } = useAuth();
+  const { register, loginWithGoogle } = useAuth();
   
   const [formData, setFormData] = useState({
     displayName: '',
@@ -19,6 +19,7 @@ export default function RegisterPage() {
   
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isLoading, setIsLoading] = useState(false);
+  const [isGoogleLoading, setIsGoogleLoading] = useState(false);
   const [registerError, setRegisterError] = useState('');
   
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -72,6 +73,22 @@ export default function RegisterPage() {
       }
     } finally {
       setIsLoading(false);
+    }
+  };
+  
+  // 處理 Google 註冊/登入
+  const handleGoogleSignup = async () => {
+    setIsGoogleLoading(true);
+    setRegisterError('');
+    
+    try {
+      await loginWithGoogle();
+      router.push('/');
+    } catch (error: any) {
+      console.error('Google 註冊失敗：', error);
+      setRegisterError('Google 註冊失敗，請稍後再試');
+    } finally {
+      setIsGoogleLoading(false);
     }
   };
   
@@ -173,6 +190,47 @@ export default function RegisterPage() {
             className="w-full btn-primary py-2 px-4 rounded-lg"
           >
             {isLoading ? '註冊中...' : '註冊'}
+          </button>
+        </div>
+        
+        <div className="relative">
+          <div className="absolute inset-0 flex items-center">
+            <div className="w-full border-t border-gray-300"></div>
+          </div>
+          <div className="relative flex justify-center text-sm">
+            <span className="px-2 bg-white text-gray-500">或使用</span>
+          </div>
+        </div>
+        
+        <div>
+          <button
+            type="button"
+            onClick={handleGoogleSignup}
+            disabled={isGoogleLoading}
+            className="w-full flex justify-center items-center space-x-2 border border-gray-300 rounded-lg py-2 px-4 bg-white hover:bg-gray-50"
+          >
+            <svg className="w-5 h-5" viewBox="0 0 24 24">
+              <path
+                d="M12.545,10.239v3.821h5.445c-0.712,2.315-2.647,3.972-5.445,3.972c-3.332,0-6.033-2.701-6.033-6.032s2.701-6.032,6.033-6.032c1.498,0,2.866,0.549,3.921,1.453l2.814-2.814C17.503,2.988,15.139,2,12.545,2C7.021,2,2.543,6.477,2.543,12s4.478,10,10.002,10c8.396,0,10.249-7.85,9.426-11.748L12.545,10.239z"
+                fill="#FFC107"
+              />
+              <path
+                d="M12.545,10.239v3.821h5.445c-0.712,2.315-2.647,3.972-5.445,3.972c-3.332,0-6.033-2.701-6.033-6.032s2.701-6.032,6.033-6.032c1.498,0,2.866,0.549,3.921,1.453l2.814-2.814C17.503,2.988,15.139,2,12.545,2C7.021,2,2.543,6.477,2.543,12s4.478,10,10.002,10c8.396,0,10.249-7.85,9.426-11.748L12.545,10.239z"
+                fill="#FF3D00"
+                mask="url(#google-mark-a)"
+              />
+              <path
+                d="M12.545,10.239v3.821h5.445c-0.712,2.315-2.647,3.972-5.445,3.972c-3.332,0-6.033-2.701-6.033-6.032s2.701-6.032,6.033-6.032c1.498,0,2.866,0.549,3.921,1.453l2.814-2.814C17.503,2.988,15.139,2,12.545,2C7.021,2,2.543,6.477,2.543,12s4.478,10,10.002,10c8.396,0,10.249-7.85,9.426-11.748L12.545,10.239z"
+                fill="#4CAF50"
+                mask="url(#google-mark-b)"
+              />
+              <path
+                d="M12.545,10.239v3.821h5.445c-0.712,2.315-2.647,3.972-5.445,3.972c-3.332,0-6.033-2.701-6.033-6.032s2.701-6.032,6.033-6.032c1.498,0,2.866,0.549,3.921,1.453l2.814-2.814C17.503,2.988,15.139,2,12.545,2C7.021,2,2.543,6.477,2.543,12s4.478,10,10.002,10c8.396,0,10.249-7.85,9.426-11.748L12.545,10.239z"
+                fill="#1976D2"
+                mask="url(#google-mark-c)"
+              />
+            </svg>
+            <span>{isGoogleLoading ? '處理中...' : '使用 Google 帳號註冊'}</span>
           </button>
         </div>
         
